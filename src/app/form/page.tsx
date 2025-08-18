@@ -11,6 +11,12 @@ export default function FormPage() {
   const [detail, setDetail] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
 
+  const allowedEmails = process.env.ALLOWED_EMAILS?.split(",") || [];
+  const userEmail = user?.emailAddresses[0].emailAddress;
+
+  // Disable button if user is not allowed
+  const isAllowed = userEmail ? allowedEmails.includes(userEmail) : false;
+
   // Update categories based on type
   useEffect(() => {
     if (type === "Pengeluaran") {
@@ -52,35 +58,35 @@ export default function FormPage() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-6 max-w-md mx-auto bg-white/80 rounded shadow">
-      <label className="block">
+      <label className="block text-gray-700">
         Tipe
         <select
           value={type}
           onChange={(e) => setType(e.target.value)}
           className="border p-2 w-full"
         >
-          <option value="Pengeluaran">Pengeluaran</option>
-          <option value="Pemasukan">Pemasukan</option>
+          <option value="Pengeluaran" className="text-gray-700">Pengeluaran</option>
+          <option value="Pemasukan" className="text-gray-700">Pemasukan</option>
         </select>
       </label>
 
-      <label className="block">
+      <label className="block text-gray-700">
         Kategori
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="border p-2 w-full"
+          className="border p-2 w-full text-gray-700"
         >
-          <option value="">Select Category</option>
+          <option value="" className="text-gray-700">Select Category</option>
           {categories.map((c) => (
-            <option key={c} value={c}>
+            <option key={c} value={c} className="text-gray-700">
               {c}
             </option>
           ))}
         </select>
       </label>
 
-      <label className="block">
+      <label className="block text-gray-700">
         Nama
         <input
           type="text"
@@ -88,39 +94,42 @@ export default function FormPage() {
           onChange={(e) => setName(e.target.value)}
           placeholder="contohnya Nasi Goreng, Kopi, dll"
           title="Nama Produk"
-          className="border p-2 w-full"
+          className="border p-2 w-full text-gray-700"
           required
         />
       </label>
 
-      <label className="block">
+      <label className="block text-gray-700">
         Harga
         <input
           type="number"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           placeholder="0"
-          className="border p-2 w-full"
+          className="border p-2 w-full text-gray-700"
           required
         />
       </label>
 
-      <label className="block">
+      <label className="block text-gray-700">
         Detail
         <textarea
           value={detail}
           onChange={(e) => setDetail(e.target.value)}
           placeholder="Optional description"
-          className="border p-2 w-full"
+          className="border p-2 w-full text-gray-700"
         />
       </label>
 
       <button
         type="submit"
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        className={`px-4 py-2 rounded text-white ${
+            isAllowed ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-400 cursor-not-allowed"
+        }`}
       >
         Submit
       </button>
+      {!isAllowed && <p className="text-red-500 text-sm mt-1">You are not authorized to submit data.</p>}
     </form>
   );
 }

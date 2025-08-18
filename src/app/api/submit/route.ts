@@ -5,6 +5,12 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    const allowedEmails = process.env.ALLOWED_EMAILS?.split(",") || [];
+    if (!allowedEmails.includes(body.email)) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+
     const auth = new google.auth.JWT({
         email: process.env.GOOGLE_CLIENT_EMAIL,
         key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),

@@ -40,7 +40,7 @@ export default function Home() {
       <SignedIn>
         <div className="p-10">
           <UserButton />
-          <h1 className="text-2xl mt-4">Welcome!</h1>
+          <h1 className="text-2xl mt-4 text-gray-700">Welcome!</h1>
             <div className="flex justify-center items-center min-h-screen">
               <FormPage />
             </div>

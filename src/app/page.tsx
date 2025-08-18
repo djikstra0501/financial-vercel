@@ -1,10 +1,11 @@
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import FormPage from "./form/page";
 
 export default function Home() {
   return (
-    <main>
+    <main className="relative min-h-screen bg-gradient-to-b from-blue-200 to-purple-300 default">
       <SignedOut>
-        <div className="relative min-h-screen bg-gradient-to-b from-blue-200 to-purple-300 default">
+        <div>
           <div className="flex justify-center items-center min-h-screen">
             <div className="text-center p-6 rounded-lg shadow-lg bg-white/80 login">
               <h1 className="text-4xl font-bold mb-4 text-gray-700">Welcome to Finance Tracker!</h1>
@@ -37,10 +38,12 @@ export default function Home() {
       </SignedOut>
 
       <SignedIn>
-        {/* After login */}
         <div className="p-10">
           <UserButton />
           <h1 className="text-2xl mt-4">Welcome!</h1>
+            <div className="flex justify-center items-center min-h-screen">
+              <FormPage />
+            </div>
         </div>
       </SignedIn>
     </main>

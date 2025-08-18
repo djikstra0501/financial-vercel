@@ -14,15 +14,28 @@ export async function POST(req: Request) {
     const sheets = google.sheets({ version: "v4", auth });
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 
+    const now = new Date();
+    const localTime = now.toLocaleString("en-US", { hour12: false });
+
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "Sheet1!A:C",
+      range: "Sheet1!A:F", // Adjust range to your columns
       valueInputOption: "RAW",
       requestBody: {
-        values: [[body.name, body.email, new Date().toISOString()]],
+        values: [
+          [
+            localTime,
+            body.email,
+            body.type,
+            body.category,
+            body.name,
+            body.price,
+            body.detail || "",
+          ],
+        ],
       },
     });
-
+    
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error(e);

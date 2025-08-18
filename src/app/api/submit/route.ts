@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     });
 
     const sheets = google.sheets({ version: "v4", auth });
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+    const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
 
     const now = new Date();
     const localTime = now.toLocaleString("en-US", { hour12: false });
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
         ],
       },
     });
-    
+
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error(e);

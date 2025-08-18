@@ -11,7 +11,7 @@ export default function FormPage() {
   const [detail, setDetail] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
 
-  const allowedEmails = process.env.ALLOWED_EMAILS?.split(",") || [];
+  const allowedEmails = process.env.NEXT_PUBLI_ALLOWED_EMAILS?.split(",") || [];
   const userEmail = user?.emailAddresses[0].emailAddress;
 
   // Disable button if user is not allowed

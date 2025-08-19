@@ -130,7 +130,7 @@ export default function FormPage() {
       >
         Submit
       </button>
-      {!isAllowed && <p className="text-red-500 text-sm mt-1">You are not authorized to submit data.</p>}
+      {/* {!isAllowed && <p className="text-red-500 text-sm mt-1">You are not authorized to submit data.</p>} */}
     </form>
   );
 }

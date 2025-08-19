@@ -22,10 +22,8 @@ export default function Home() {
           </div>
 
           <div className="w-full md:w-1/2 flex justify-start p-8">
-            <div className="w-full max-w-md h-96 bg-white/80 rounded-lg shadow-lg overflow-hidden">
-              <div className="p-4 h-full flex items-center justify-center text-gray-500">
+            <div className="w-full max-w-md bg-white/80 rounded-lg shadow-lg overflow-hidden">
                 <ChatPage />
-              </div>
             </div>
           </div>
         </div>

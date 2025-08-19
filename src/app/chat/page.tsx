@@ -1,26 +1,44 @@
 "use client";
 
 import { useState } from "react";
-import { askQwen } from "../../lib/qwenService";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
-    // add user msg
+    // Add user message
     const userMsg = { role: "user", content: input };
     setMessages((prev) => [...prev, userMsg]);
-
-    // clear input
     setInput("");
+    setIsLoading(true);
 
-    // ask Qwen
-    const reply = await askQwen(input);
-    const botMsg = { role: "assistant", content: reply };
-    setMessages((prev) => [...prev, botMsg]);
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: input }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response');
+      }
+
+      const data = await response.json();
+      const botMsg = { role: "assistant", content: data.reply };
+      setMessages((prev) => [...prev, botMsg]);
+    } catch (error) {
+      console.error("Error:", error);
+      const errorMsg = { role: "assistant", content: "Sorry, I encountered an error." };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -39,6 +57,11 @@ export default function ChatPage() {
             {m.content}
           </div>
         ))}
+        {isLoading && (
+          <div className="p-2 rounded-xl bg-gray-300 text-black self-start max-w-[70%]">
+            Thinking...
+          </div>
+        )}
       </div>
 
       {/* Input */}
@@ -50,12 +73,14 @@ export default function ChatPage() {
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           className="flex-1 p-2 border rounded-lg"
           placeholder="Say something..."
+          disabled={isLoading}
         />
         <button
           onClick={sendMessage}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-blue-300"
+          disabled={isLoading}
         >
-          Send
+          {isLoading ? "Sending..." : "Send"}
         </button>
       </div>
     </div>

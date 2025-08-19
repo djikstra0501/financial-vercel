@@ -1,9 +1,11 @@
 import { Client } from "@gradio/client";
 import { readFileSync } from "fs";
+import path from "path";
 
 let client: any;
 
-const sysPrompt = readFileSync("qwenBaseModel.txt", "utf-8")
+const sysPromptPath = path.join(process.cwd(), 'qwenBaseModel.txt');
+const sysPrompt = readFileSync(sysPromptPath, "utf-8");
 
 async function initQwen() {
   if (!client) {

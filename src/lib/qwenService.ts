@@ -10,6 +10,23 @@ let client: QwenClient | null = null;
 const sysPromptPath = path.join(process.cwd(), 'qwenBaseModel.txt');
 const sysPrompt = readFileSync(sysPromptPath, "utf-8");
 
+interface BrowserState {
+  messages?: ChatMessage[];
+  output?: unknown;
+  response?: unknown;
+  text?: unknown;
+  content?: unknown;
+  data?: unknown;
+  message?: unknown;
+  [key: string]: unknown;
+}
+
+interface ChatMessage {
+  role?: string;
+  content?: string;
+  [key: string]: unknown;
+}
+
 async function initQwen(): Promise<QwenClient> {
   if (!client) {
     client = await Client.connect("Qwen/Qwen3-Demo");
@@ -129,9 +146,11 @@ export async function askQwen(message: string): Promise<string> {
       
       // Try to extract response from different possible structures
       if (browserState && typeof browserState === 'object') {
+        const state = browserState as BrowserState;
+
         // Check for messages array
-        if (browserState.messages && Array.isArray(browserState.messages)) {
-          const assistantMessages = browserState.messages.filter((msg: any) => 
+        if (state.messages && Array.isArray(state.messages)) {
+          const assistantMessages = state.messages.filter((msg: ChatMessage) => 
             msg.role === 'assistant' || msg.role === 'bot'
           );
           if (assistantMessages.length > 0) {
@@ -143,12 +162,12 @@ export async function askQwen(message: string): Promise<string> {
         // Check for direct response fields
         const possibleResponseFields = ['output', 'response', 'text', 'content', 'data', 'message'];
         for (const field of possibleResponseFields) {
-          if (browserState[field]) {
-            if (typeof browserState[field] === 'string') {
-              fullResponse = browserState[field];
+          if (state[field]) {
+            if (typeof state[field] === 'string') {
+              fullResponse = state[field];
               break;
-            } else if (Array.isArray(browserState[field]) && browserState[field][0]) {
-              fullResponse = browserState[field][0];
+            } else if (Array.isArray(state[field]) && state[field][0]) {
+              fullResponse = state[field][0];
               break;
             }
           }

@@ -41,13 +41,13 @@ interface ConversationContexts {
   [key: string]: ConversationContext;
 }
 
-interface ConversationValue {
+interface ConversationData {
   conversations: Array<{ label: string; key: string }>;
   conversation_contexts: ConversationContexts;
 }
 
 interface ResponseDataItem {
-  value?: ConversationValue;
+  value?: ConversationData;
   __type__?: string;
 }
 
@@ -70,6 +70,7 @@ export async function askQwen(message: string): Promise<string> {
   try {
     const c = await initQwen();
     
+    console.log("Sending message to Qwen...");
     const browserState = await c.predict("/add_message", {
       input_value: message,
       settings_form_value: {
@@ -79,30 +80,42 @@ export async function askQwen(message: string): Promise<string> {
       },
     });
 
+    console.log("Raw response:", JSON.stringify(browserState, null, 2));
+    
     const responseData = browserState as PredictResponse;
     
-    const contexts = responseData?.data?.[0]?.value?.conversation_contexts;
-    if (contexts) {
-      const conversationId = Object.keys(contexts)[0];
+    if (responseData?.data && responseData.data.length > 0) {
+      const firstDataItem = responseData.data[0];
       
-      if (conversationId) {
-        const context = contexts[conversationId];
-        const assistantMessage = context.history?.[1];
+      if (firstDataItem?.value?.conversation_contexts) {
+        const contexts = firstDataItem.value.conversation_contexts;
+        const conversationIds = Object.keys(contexts);
         
-        if (assistantMessage?.content) {
-          if (typeof assistantMessage.content === 'string') {
-            return assistantMessage.content;
-          } else if (Array.isArray(assistantMessage.content)) {
-            const contentItems = assistantMessage.content as TextContentItem[];
-            return contentItems
-              .filter(item => item.type === 'text')
-              .map(item => item.content)
-              .join('\n');
+        if (conversationIds.length > 0) {
+          const firstConversationId = conversationIds[0];
+          const context = contexts[firstConversationId];
+          
+          if (context.history && context.history.length > 1) {
+            const assistantMessage = context.history[1];
+            
+            if (assistantMessage.content) {
+              if (typeof assistantMessage.content === 'string') {
+                return assistantMessage.content;
+              } else if (Array.isArray(assistantMessage.content)) {
+                const textContents = assistantMessage.content
+                  .filter(item => item.type === 'text')
+                  .map(item => item.content)
+                  .join('\n');
+                
+                return textContents || "Received empty response";
+              }
+            }
           }
         }
       }
     }
     
+    console.warn("Unexpected response structure:", JSON.stringify(responseData, null, 2));
     return "I received your message but the response format was unexpected.";
     
   } catch (error) {

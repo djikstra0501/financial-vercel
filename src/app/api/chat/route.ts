@@ -16,4 +16,5 @@ export async function POST(req: Request) {
     console.error("Qwen API error:", error);
     return NextResponse.json({ error: "Failed to fetch from Qwen" }, { status: 500 });
   }
+  
 }

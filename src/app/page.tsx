@@ -20,22 +20,19 @@ export default function Home() {
               </SignInButton>
             </div>
           </div>
-
-          <div className="w-full md:w-1/2 flex justify-start p-8">
-            <div className="w-full max-w-md bg-white/80 rounded-lg shadow-lg overflow-hidden">
-                <ChatPage />
-            </div>
-          </div>
         </div>
       </SignedOut>
 
       <SignedIn>
-        <div className="p-10">
-          <UserButton />
-          <h1 className="text-2xl mt-4 text-gray-700">Welcome!</h1>
-            <div className="flex justify-center items-center min-h-screen">
-              <FormPage />
-            </div>
+        <div className="container mx-auto p-4">
+          <div>
+            <UserButton />
+            <h1 className="text-2xl mt-4 text-gray-700">Welcome!</h1>
+              <div className="flex justify-center items-center min-h-screen">
+                <FormPage />
+              </div>
+          </div>
+          <ChatPage />
         </div>
       </SignedIn>
     </main>

@@ -31,12 +31,14 @@ interface ChatMessage {
   status?: string;
 }
 
+interface DataItem {
+  value?: ChatMessage[];
+  __type__?: string;
+  [key: string]: unknown;
+}
+
 interface PredictResponse {
-  data?: Array<{
-    value?: ChatMessage[];
-    __type__?: string;
-    [key: string]: unknown;
-  }>;
+  data?: DataItem[];
   type?: string;
   time?: Date;
   endpoint?: string;
@@ -75,7 +77,6 @@ export async function askQwen(message: string): Promise<string> {
           if (typeof assistantMessage.content === 'string') {
             return assistantMessage.content;
           } else if (Array.isArray(assistantMessage.content)) {
-            // Extract text content from the message items
             const textContent = assistantMessage.content
               .filter(item => item.type === 'text')
               .map(item => item.content)
@@ -90,7 +91,7 @@ export async function askQwen(message: string): Promise<string> {
     if (responseData?.data) {
       for (const dataItem of responseData.data) {
         if (dataItem?.value && Array.isArray(dataItem.value)) {
-          const assistantMessage = dataItem.value.find((msg: any) => 
+          const assistantMessage = dataItem.value.find(msg => 
             msg.role === 'assistant' && msg.content
           );
           
@@ -99,8 +100,8 @@ export async function askQwen(message: string): Promise<string> {
               return assistantMessage.content;
             } else if (Array.isArray(assistantMessage.content)) {
               const textContent = assistantMessage.content
-                .filter((item: any) => item.type === 'text')
-                .map((item: any) => item.content)
+                .filter(item => item.type === 'text')
+                .map(item => item.content)
                 .join('\n');
               
               if (textContent) return textContent;

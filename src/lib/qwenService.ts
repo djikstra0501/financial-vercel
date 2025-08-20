@@ -10,49 +10,33 @@ let client: QwenClient | null = null;
 const sysPromptPath = path.join(process.cwd(), 'qwenBaseModel.txt');
 const sysPrompt = readFileSync(sysPromptPath, "utf-8");
 
-interface TextContentItem {
+interface MessageContentItem {
   type: string;
+  copyable: boolean;
+  editable: boolean;
   content: string;
+  options?: {
+    title?: string;
+    status?: string;
+  } | null;
 }
 
 interface ChatMessage {
   role: string;
-  content: string | TextContentItem[];
+  content: string | MessageContentItem[];
   key: string;
   header?: string;
+  footer?: string;
   loading?: boolean;
   status?: string;
-  footer?: string;
-}
-
-interface ConversationSettings {
-  model: string;
-  sys_prompt: string;
-  thinking_budget: number;
-}
-
-interface ConversationContext {
-  history: ChatMessage[];
-  settings: ConversationSettings;
-  enable_thinking: boolean;
-}
-
-interface ConversationContexts {
-  [key: string]: ConversationContext;
-}
-
-interface ConversationData {
-  conversations: Array<{ label: string; key: string }>;
-  conversation_contexts: ConversationContexts;
-}
-
-interface ResponseDataItem {
-  value?: ConversationData;
-  __type__?: string;
 }
 
 interface PredictResponse {
-  data?: ResponseDataItem[];
+  data?: Array<{
+    value?: ChatMessage[];
+    __type__?: string;
+    [key: string]: unknown;
+  }>;
   type?: string;
   time?: Date;
   endpoint?: string;
@@ -70,7 +54,6 @@ export async function askQwen(message: string): Promise<string> {
   try {
     const c = await initQwen();
     
-    console.log("Sending message to Qwen...");
     const browserState = await c.predict("/add_message", {
       input_value: message,
       settings_form_value: {
@@ -80,43 +63,54 @@ export async function askQwen(message: string): Promise<string> {
       },
     });
 
-    console.log("Raw response:", JSON.stringify(browserState, null, 2));
-    
     const responseData = browserState as PredictResponse;
     
-    if (responseData?.data && responseData.data.length > 0) {
-      const firstDataItem = responseData.data[0];
+    if (responseData?.data && responseData.data.length > 5) {
+      const messageData = responseData.data[5];
       
-      if (firstDataItem?.value?.conversation_contexts) {
-        const contexts = firstDataItem.value.conversation_contexts;
-        const conversationIds = Object.keys(contexts);
+      if (messageData?.value && Array.isArray(messageData.value)) {
+        const assistantMessage = messageData.value.find(msg => msg.role === 'assistant');
         
-        if (conversationIds.length > 0) {
-          const firstConversationId = conversationIds[0];
-          const context = contexts[firstConversationId];
-          
-          if (context.history && context.history.length > 1) {
-            const assistantMessage = context.history[1];
+        if (assistantMessage?.content) {
+          if (typeof assistantMessage.content === 'string') {
+            return assistantMessage.content;
+          } else if (Array.isArray(assistantMessage.content)) {
+            // Extract text content from the message items
+            const textContent = assistantMessage.content
+              .filter(item => item.type === 'text')
+              .map(item => item.content)
+              .join('\n');
             
-            if (assistantMessage.content) {
-              if (typeof assistantMessage.content === 'string') {
-                return assistantMessage.content;
-              } else if (Array.isArray(assistantMessage.content)) {
-                const textContents = assistantMessage.content
-                  .filter(item => item.type === 'text')
-                  .map(item => item.content)
-                  .join('\n');
-                
-                return textContents || "Received empty response";
-              }
+            return textContent || "Received empty response";
+          }
+        }
+      }
+    }
+    
+    if (responseData?.data) {
+      for (const dataItem of responseData.data) {
+        if (dataItem?.value && Array.isArray(dataItem.value)) {
+          const assistantMessage = dataItem.value.find((msg: any) => 
+            msg.role === 'assistant' && msg.content
+          );
+          
+          if (assistantMessage) {
+            if (typeof assistantMessage.content === 'string') {
+              return assistantMessage.content;
+            } else if (Array.isArray(assistantMessage.content)) {
+              const textContent = assistantMessage.content
+                .filter((item: any) => item.type === 'text')
+                .map((item: any) => item.content)
+                .join('\n');
+              
+              if (textContent) return textContent;
             }
           }
         }
       }
     }
     
-    console.warn("Unexpected response structure:", JSON.stringify(responseData, null, 2));
-    return "I received your message but the response format was unexpected.";
+    return "I received your message but couldn't extract the response.";
     
   } catch (error) {
     console.error("Qwen service error:", error);

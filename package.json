@@ -12,9 +12,11 @@
     "@clerk/nextjs": "^6.31.1",
     "@huggingface/inference": "^4.7.1",
     "dotenv": "^17.2.1",
+    "eventsource": "^4.0.0",
     "fs": "^0.0.1-security",
     "googleapis": "^156.0.0",
     "next": "15.4.6",
+    "node-fetch": "^3.3.2",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

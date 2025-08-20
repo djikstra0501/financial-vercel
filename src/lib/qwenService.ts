@@ -10,22 +10,53 @@ let client: QwenClient | null = null;
 const sysPromptPath = path.join(process.cwd(), 'qwenBaseModel.txt');
 const sysPrompt = readFileSync(sysPromptPath, "utf-8");
 
+interface TextContentItem {
+  type: string;
+  content: string;
+}
+
+interface ChatMessage {
+  role: string;
+  content: string | TextContentItem[];
+  key: string;
+  header?: string;
+  loading?: boolean;
+  status?: string;
+  footer?: string;
+}
+
+interface ConversationSettings {
+  model: string;
+  sys_prompt: string;
+  thinking_budget: number;
+}
+
 interface ConversationContext {
-  history: Array<{
-    role: string;
-    content: string | Array<{ type: string; content: string }>;
-    key: string;
-    header?: string;
-    loading?: boolean;
-    status?: string;
-    footer?: string;
-  }>;
-  settings: {
-    model: string;
-    sys_prompt: string;
-    thinking_budget: number;
-  };
+  history: ChatMessage[];
+  settings: ConversationSettings;
   enable_thinking: boolean;
+}
+
+interface ConversationContexts {
+  [key: string]: ConversationContext;
+}
+
+interface ConversationValue {
+  conversations: Array<{ label: string; key: string }>;
+  conversation_contexts: ConversationContexts;
+}
+
+interface ResponseDataItem {
+  value?: ConversationValue;
+  __type__?: string;
+}
+
+interface PredictResponse {
+  data?: ResponseDataItem[];
+  type?: string;
+  time?: Date;
+  endpoint?: string;
+  fn_index?: number;
 }
 
 async function initQwen(): Promise<QwenClient> {
@@ -48,23 +79,24 @@ export async function askQwen(message: string): Promise<string> {
       },
     });
 
-    const responseData = browserState as any;
+    const responseData = browserState as PredictResponse;
     
-    if (responseData?.data?.[0]?.value?.conversation_contexts) {
-      const contexts = responseData.data[0].value.conversation_contexts;
+    const contexts = responseData?.data?.[0]?.value?.conversation_contexts;
+    if (contexts) {
       const conversationId = Object.keys(contexts)[0];
       
       if (conversationId) {
-        const context = contexts[conversationId] as ConversationContext;
+        const context = contexts[conversationId];
         const assistantMessage = context.history?.[1];
         
         if (assistantMessage?.content) {
           if (typeof assistantMessage.content === 'string') {
             return assistantMessage.content;
           } else if (Array.isArray(assistantMessage.content)) {
-            return assistantMessage.content
-              .filter((item: any) => item.type === 'text')
-              .map((item: any) => item.content)
+            const contentItems = assistantMessage.content as TextContentItem[];
+            return contentItems
+              .filter(item => item.type === 'text')
+              .map(item => item.content)
               .join('\n');
           }
         }

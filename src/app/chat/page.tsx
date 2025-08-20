@@ -1,11 +1,18 @@
+// src/app/chat/page.tsx
 "use client";
 
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 
+interface ChatMessage {
+  id: string; // Add unique id
+  role: string;
+  content: string;
+}
+
 export default function ChatPage() {
   const { isLoaded, userId } = useAuth();
-  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +25,11 @@ export default function ChatPage() {
     }
 
     setError(null);
-    const userMsg = { role: "user", content: input };
+    const userMsg: ChatMessage = { 
+      id: Date.now() + '-user',
+      role: "user", 
+      content: input 
+    };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
@@ -41,7 +52,11 @@ export default function ChatPage() {
         throw new Error("Invalid response format");
       }
 
-      const botMsg = { role: "assistant", content: data.reply };
+      const botMsg: ChatMessage = { 
+        id: Date.now() + '-bot',
+        role: "assistant", 
+        content: data.reply 
+      };
       setMessages((prev) => [...prev, botMsg]);
     } catch (err) {
       console.error("Error:", err);
@@ -64,9 +79,9 @@ export default function ChatPage() {
           </div>
         )}
         
-        {messages.map((m, i) => (
+        {messages.map((m) => ( 
           <div
-            key={i}
+            key={m.id}
             className={`p-2 rounded-xl ${
               m.role === "user"
                 ? "bg-blue-500 text-white self-end max-w-[70%] ml-auto"

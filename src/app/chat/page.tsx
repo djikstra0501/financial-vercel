@@ -18,12 +18,11 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [model, setModel] = useState<"gpt" | "qwen">("gpt");
 
-  // Send baseModel.txt to backend whenever model changes
   useEffect(() => {
     (async () => {
       try {
         if (!userId) return;
-        setMessages([]); // clear chat history
+        setMessages([]);
         setError(null);
         setInput("");
 

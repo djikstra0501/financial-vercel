@@ -4,7 +4,7 @@ import ChatPage from "./chat/page";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-gradient-to-b from-blue-200 to-purple-300 default">
+    <main className="relative min-h-screen bg-gradient-to-br from-blue-900 via-purple-800 to-blue-700 text-white">
       <SignedOut>
         <div className="min-h-screen flex flex-col md:flex-row">
           <div className="w-full md:w-1/2 flex justify-end p-8">
@@ -24,15 +24,23 @@ export default function Home() {
       </SignedOut>
 
       <SignedIn>
-        <div className="container mx-auto p-4">
-          <div>
+        <div className="flex flex-col min-h-screen">
+          <header className="flex justify-between items-center p-4 border-b border-white/20">
+            <h1 className="text-xl font-bold">Finance Tracker Dashboard</h1>
             <UserButton />
-            <h1 className="text-2xl mt-4 text-gray-700">Welcome!</h1>
-              <div className="flex justify-center items-center min-h-screen">
-                <FormPage />
-              </div>
+          </header>
+
+          <div className="flex flex-1 justify-center items-start gap-6 p-6">
+            <div className="w-[400px] h-[600px] bg-white/10 rounded-lg shadow-lg overflow-y-auto p-4">
+              <h2 className="text-lg font-semibold mb-2">Expense Form</h2>
+              <FormPage />
+            </div>
+
+            <div className="w-[600px] h-[600px] bg-white/10 rounded-lg shadow-lg overflow-y-auto p-4">
+              <h2 className="text-lg font-semibold mb-2">AI Chat</h2>
+              <ChatPage />
+            </div>
           </div>
-          <ChatPage />
         </div>
       </SignedIn>
     </main>

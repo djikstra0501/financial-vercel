@@ -15,7 +15,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [model, setModel] = useState<"gpt" | "qwen">("gpt"); // Default GPT
+  const [model, setModel] = useState<"gpt" | "qwen">("gpt");
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -72,12 +72,18 @@ export default function ChatPage() {
         <select
           id="model"
           value={model}
-          onChange={(e) => setModel(e.target.value as "gpt" | "qwen")}
+          onChange={(e) => {
+            const newModel = e.target.value as "gpt" | "qwen";
+            setModel(newModel);
+            setMessages([]);
+            setError(null);
+            setInput("");
+          }}
           className="border p-2 rounded-lg"
           disabled={isLoading}
         >
-          <option value="gpt">GPT (Gradio)</option>
-          <option value="qwen">Qwen</option>
+          <option value="gpt">GPT-5</option>
+          <option value="qwen">Qwen 3</option>
         </select>
       </div>
 

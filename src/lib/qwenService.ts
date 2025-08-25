@@ -7,7 +7,7 @@ type QwenClient = Awaited<ReturnType<typeof Client.connect>>;
 
 let client: QwenClient | null = null;
 
-const sysPromptPath = path.join(process.cwd(), 'qwenBaseModel.txt');
+const sysPromptPath = path.join(process.cwd(), 'baseModel.txt');
 const sysPrompt = readFileSync(sysPromptPath, "utf-8");
 
 interface MessageContentItem {

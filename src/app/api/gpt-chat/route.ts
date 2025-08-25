@@ -1,4 +1,3 @@
-// src/app/api/gpt-chat/route.ts
 import { NextResponse } from "next/server";
 import { sendChatMessage } from "@/lib/gptService";
 

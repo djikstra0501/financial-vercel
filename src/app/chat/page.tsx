@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { loadBaseModel } from "@/lib/loadBaseModel";
 
 interface ChatMessage {
   id: string;
@@ -16,6 +17,31 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [model, setModel] = useState<"gpt" | "qwen">("gpt");
+
+  // Send baseModel.txt to backend whenever model changes
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!userId) return;
+        setMessages([]); // clear chat history
+        setError(null);
+        setInput("");
+
+        const baseRules = await loadBaseModel();
+        const endpoint = model === "gpt" ? "/api/gpt-chat" : "/api/chat";
+
+        console.log(`[ChatPage] Sending baseModel.txt to ${model}:`, baseRules);
+
+        await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: baseRules }),
+        });
+      } catch (err) {
+        console.error("[ChatPage] Failed to send baseModel.txt:", err);
+      }
+    })();
+  }, [model, userId]);
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -72,13 +98,7 @@ export default function ChatPage() {
         <select
           id="model"
           value={model}
-          onChange={(e) => {
-            const newModel = e.target.value as "gpt" | "qwen";
-            setModel(newModel);
-            setMessages([]);
-            setError(null);
-            setInput("");
-          }}
+          onChange={(e) => setModel(e.target.value as "gpt" | "qwen")}
           className="border p-2 rounded-lg"
           disabled={isLoading}
         >

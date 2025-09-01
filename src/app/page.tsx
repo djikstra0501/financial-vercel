@@ -9,7 +9,7 @@ export default function Home() {
     <main className="relative min-h-screen bg-gradient-to-br from-blue-900 via-purple-800 to-blue-700 text-white flex flex-col">
       <header className="flex justify-between items-center p-6 border-b border-white/20">
         <div className="flex items-center gap-3">
-          <Image src="/wave.png" alt="Daya Finance Logo" width={40} height={40} />
+          <Image src="/wave.svg" alt="Daya Finance Logo" width={40} height={40} />
           <h1 className="text-2xl font-bold">Daya Finance</h1>
         </div>
         <SignedOut>
